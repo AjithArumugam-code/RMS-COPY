@@ -1,0 +1,87 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- <bean id="serviceHelper" parent="txProxyTemplate"> <property name="target"> 
+		<bean class="com.util.ServiceHelper"> <property name="sessionFactory"><ref 
+		bean="sessionFactory"/></property> </bean> </property> </bean> -->
+
+	<!-- <bean id="datasource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"> 
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"></property> 
+		<property name="url" value="jdbc:mysql://localhost:3306/RMS"></property> 
+		<property name="username" value="root"></property> <property name="password" 
+		value="root"></property> </bean> <bean id="createSessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean"> 
+		<property name="dataSource" ref="datasource"></property> <property name="annotatedClasses"> 
+		<list> <value>com.project.model.Users</value> <value>com.project.model.Roles</value> 
+		</list> </property> </bean> <bean id="template" class="org.springframework.orm.hibernate5.HibernateTemplate"> 
+		<property name="sessionFactory" ref="createSessionFactory"></property> <property 
+		name="checkWriteOperations" value="false"></property> </bean> -->
+
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName"
+			value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost:3306/RMS" />
+		<property name="username" value="root" />
+		<property name="password" value="root" />
+	</bean>
+	<bean id="userDAO" parent="txProxyTemplate">
+		<property name="target">
+			<bean class="com.project.service.UserDaoImpl">
+				<property name="sessionFactory">
+					<ref bean="sessionFactory" />
+				</property>
+			</bean>
+		</property>
+	</bean>
+
+	<!-- <bean id="serviceHelper" parent="txProxyTemplate"> <property name="target"> 
+		<bean class="com.util.ServiceHelper"> <property name="sessionFactory"><ref 
+		bean="sessionFactory"/></property> </bean> </property> </bean> -->
+
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+		<property name="dataSource">
+			<ref bean="dataSource" />
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</prop>
+				<prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+				<prop key="hibernate.cache.use_second_level_cache">false</prop>
+				<prop key="hibernate.jdbc.batch_size">30</prop>
+				<prop key="hibernate.show_sql">false</prop>
+			</props>
+		</property>
+		<property name="annotatedClasses">
+			<list>
+				<value>com.project.domain.Users</value>
+				<value>com.project.domain.Roles</value>
+				<value>com.project.domain.UserRoles</value>
+				<value>com.project.domain.Resources</value>
+				<value>com.project.domain.Resume</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+
+	<bean id="txProxyTemplate" abstract="true"
+		class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager">
+			<ref bean="transactionManager" />
+		</property>
+		<property name="transactionAttributeSource">
+			<bean
+				class="org.springframework.transaction.annotation.AnnotationTransactionAttributeSource" />
+		</property>
+	</bean>
+
+
+</beans>
